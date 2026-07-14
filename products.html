@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products | Esha Apparels Tokyo 2026 Lookbook</title>
+    <meta
+      name="description"
+      content="Premium product gallery for Esha Apparels' Tokyo 2026 garment export lookbook."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="products.css" />
+  </head>
+  <body data-design-page="products">
+    <header class="app-shell">
+      <div class="brand-block" data-design-target="products-brand-block" data-design-label="Products brand block" data-design-kind="frame">
+        <span class="brand-kicker">Esha Apparels</span>
+        <span class="brand-subtitle">High-Fashion Womenswear / Tokyo 2026</span>
+      </div>
+
+      <div class="header-actions">
+        <nav class="page-nav" aria-label="Page navigation">
+          <a href="index.html#cover">Cover</a>
+          <a href="index.html#story">Story</a>
+          <a href="index.html#collection">Collection</a>
+          <a href="index.html#factory">Factory</a>
+          <a href="products.html" class="is-current">Products</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="lookbook products-lookbook">
+      <section class="collection-hero reveal" data-section="products-intro">
+        <p class="collection-kicker">Collection</p>
+        <div class="collection-title-row">
+          <h1>Tokyo 2026</h1>
+          <button class="gallery-add-button" id="addProductButton" type="button">
+            Add Product
+          </button>
+        </div>
+      </section>
+
+      <section class="products-gallery" aria-label="Tokyo 2026 product gallery">
+        <div class="products-list" id="productsList"></div>
+
+        <div class="products-footer">
+          <button class="add-product-inline" id="addProductButtonBottom" type="button">
+            Add Product
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="products.js"></script>
+  </body>
+</html>
