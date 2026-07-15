@@ -315,7 +315,8 @@ p {
   position: relative;
   z-index: 1;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: clamp(28px, 3vw, 46px);
+  column-gap: clamp(28px, 3vw, 46px);
+  row-gap: clamp(24px, 2.6vw, 38px);
   align-items: start;
 }
 
@@ -342,7 +343,7 @@ p {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: clamp(18px, 2.2vw, 30px);
   align-items: start;
-  margin-bottom: clamp(52px, 6vw, 82px);
+  margin-bottom: clamp(40px, 4.8vw, 64px);
 }
 
 .story-heading .section-index {
@@ -388,6 +389,20 @@ p {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.company-profile-layout {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.82fr) minmax(0, 1.7fr);
+  gap: clamp(22px, 3vw, 42px);
+  align-items: stretch;
+}
+
+.company-profile-copy {
+  grid-column: auto;
+  max-width: 29rem;
+  align-content: center;
 }
 
 .story-kicker {
@@ -467,6 +482,34 @@ p {
   gap: clamp(22px, 2vw, 30px);
 }
 
+.company-profile-media {
+  grid-column: auto;
+  display: grid;
+  grid-template-columns: minmax(520px, 58%) minmax(760px, 86%);
+  gap: clamp(10px, 1vw, 14px);
+  min-height: clamp(360px, 32vw, 440px);
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(105, 76, 56, 0.34) transparent;
+}
+
+.company-profile-media::-webkit-scrollbar {
+  height: 8px;
+}
+
+.company-profile-media::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.company-profile-media::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(105, 76, 56, 0.32);
+}
+
 .page-story .story-media-stack .media-slot {
   padding: clamp(14px, 1.3vw, 20px);
   border-color: rgba(38, 25, 18, 0.08);
@@ -493,6 +536,39 @@ p {
   box-shadow: 0 18px 38px rgba(38, 25, 18, 0.055);
 }
 
+.page-story .company-profile-media .media-slot {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: clamp(10px, 1vw, 14px);
+}
+
+.page-story .company-profile-media__secondary {
+  aspect-ratio: 1640 / 959;
+  padding: 0;
+}
+
+.page-story .company-profile-media .media-wide,
+.page-story .company-profile-media .media-landscape {
+  min-height: 0;
+}
+
+.page-story .company-profile-media .slot-surface {
+  min-height: 0;
+  height: 100%;
+}
+
+.page-story .company-profile-media__primary img,
+.page-story .company-profile-media__primary video {
+  object-position: 52% 52%;
+}
+
+.page-story .company-profile-media__secondary img,
+.page-story .company-profile-media__secondary video {
+  object-fit: cover;
+  object-position: center center;
+}
+
 .collection-card,
 .factory-detail-card,
 .contact-card {
@@ -507,8 +583,8 @@ p {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: clamp(24px, 3vw, 44px);
-  margin-top: clamp(58px, 6vw, 86px);
-  padding: clamp(38px, 4vw, 56px) 0 0;
+  margin-top: clamp(42px, 4.5vw, 60px);
+  padding: clamp(30px, 3.4vw, 44px) 0 0;
   border: 0;
   border-top: 1px solid rgba(38, 25, 18, 0.1);
   border-radius: 0;
@@ -707,9 +783,9 @@ p {
 
 .process-flow-panel {
   display: grid;
-  grid-template-columns: minmax(260px, 0.34fr) minmax(620px, 1fr);
-  gap: clamp(34px, 4vw, 58px);
-  align-items: start;
+  grid-template-columns: minmax(260px, 0.42fr) minmax(420px, 0.58fr);
+  gap: clamp(28px, 3.4vw, 48px);
+  align-items: center;
   padding: clamp(22px, 3vw, 34px);
 }
 
@@ -738,9 +814,8 @@ p {
 .process-flow-image {
   display: block;
   justify-self: center;
-  width: min(100%, 940px);
-  height: auto;
-  max-height: none;
+  width: min(100%, 520px);
+  height: clamp(520px, 52vw, 680px);
   object-fit: contain;
   border-radius: 18px;
   background: #ffffff;
@@ -1123,7 +1198,7 @@ p {
 
   .story-heading {
     grid-template-columns: 1fr;
-    margin-bottom: 46px;
+    margin-bottom: 42px;
   }
 
   .story-heading .section-index,
@@ -1139,6 +1214,20 @@ p {
   .story-heading h2 {
     max-width: 760px;
     font-size: clamp(3.35rem, 8vw, 4.15rem);
+  }
+
+  .company-profile-layout {
+    grid-template-columns: minmax(230px, 0.92fr) minmax(0, 1.35fr);
+    gap: clamp(18px, 2.8vw, 30px);
+  }
+
+  .company-profile-copy {
+    max-width: 26rem;
+  }
+
+  .company-profile-media {
+    grid-template-columns: minmax(430px, 62%) minmax(680px, 92%);
+    min-height: clamp(330px, 36vw, 400px);
   }
 
   .story-point-grid {
@@ -1231,13 +1320,18 @@ p {
     border-radius: 24px;
   }
 
+  .process-flow-image {
+    width: min(100%, 440px);
+    height: clamp(420px, 118vw, 560px);
+  }
+
   .objective-panel {
     padding: 30px 0 0;
     border-radius: 0;
   }
 
   .story-heading {
-    margin-bottom: 34px;
+    margin-bottom: 32px;
   }
 
   .story-heading h2 {
@@ -1251,6 +1345,27 @@ p {
 
   .story-lead {
     font-size: clamp(1.85rem, 8vw, 2.45rem);
+  }
+
+  .company-profile-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .company-profile-copy {
+    max-width: 100%;
+    align-content: start;
+  }
+
+  .company-profile-media {
+    grid-template-columns: minmax(280px, 82%) minmax(560px, 112%);
+    min-height: 0;
+    height: auto;
+  }
+
+  .page-story .company-profile-media .media-slot {
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
 
   .media-tall,
@@ -1270,10 +1385,26 @@ p {
     min-height: 280px;
   }
 
+  .page-story .company-profile-media .media-wide,
+  .page-story .company-profile-media .media-landscape {
+    min-height: 0;
+  }
+
   .slot-controls {
     top: 12px;
     right: 12px;
   }
+}
+
+@media (max-width: 520px) {
+  .company-profile-media {
+    grid-template-columns: minmax(270px, 86%) minmax(520px, 132%);
+  }
+
+  .page-story .company-profile-media .media-slot {
+    aspect-ratio: 16 / 11;
+  }
+
 }
 
 @media print {

@@ -200,6 +200,8 @@ body[data-design-page="products"] .page-nav a.is-current::after {
   display: grid;
   align-content: start;
   gap: 18px;
+  content-visibility: auto;
+  contain-intrinsic-size: 760px 980px;
 }
 
 .product-upload-slot {
@@ -259,13 +261,20 @@ body[data-design-page="products"] .page-nav a.is-current::after {
 }
 
 .slot-surface {
+  position: absolute;
+  inset: 0;
   display: block;
   min-height: 100%;
+  overflow: hidden;
 }
 
 .slot-surface > img,
 .slot-surface > video {
+  position: absolute;
+  inset: 0;
   display: block;
+  min-width: 100%;
+  min-height: 100%;
   object-fit: cover;
   object-position: center;
   transition: transform 300ms ease;
@@ -279,6 +288,8 @@ body[data-design-page="products"] .page-nav a.is-current::after {
 .product-placeholder {
   display: grid;
   place-items: center;
+  min-width: 100%;
+  min-height: 100%;
   padding: 28px;
   color: rgba(21, 21, 21, 0.42);
   font-family: var(--product-sans);

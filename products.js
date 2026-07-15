@@ -6,6 +6,35 @@ const productMediaSlots = ["front"];
 const productImageExtensions = ["jpeg", "jpg", "png", "webp", "avif", "svg"];
 const productVideoExtensions = ["mp4", "webm", "mov"];
 const productTypes = ["DRESS", "TOP", "CO-ORD SET", "SKIRT", "TUNIC", "BLOUSE"];
+const productMediaFilePattern = /\.(avif|heic|heif|jpeg|jpg|mov|mp4|png|svg|webm|webp)$/i;
+const bundledProductMedia = {
+  "collection-01": { src: "media/collection-01.jpeg", type: "image" },
+  "collection-02": { src: "media/collection-02.jpeg", type: "image" },
+  "collection-03": { src: "media/collection-03.jpeg", type: "image" },
+  "cover-hero": { src: "media/cover-hero.jpeg", type: "image" },
+  "product-01-back": { src: "media/product-01-back.jpeg", type: "image" },
+  "product-01-front": { src: "media/product-01-front.jpeg", type: "image" },
+  "product-02-back": { src: "media/product-02-back.jpeg", type: "image" },
+  "product-02-front": { src: "media/product-02-front.jpeg", type: "image" },
+  "product-03-back": { src: "media/product-03-back.jpeg", type: "image" },
+  "product-03-front": { src: "media/product-03-front.jpeg", type: "image" },
+  "product-04-back": { src: "media/product-04-back.jpeg", type: "image" },
+  "product-04-front": { src: "media/product-04-front.jpeg", type: "image" },
+  "product-05-back": { src: "media/product-05-back.jpeg", type: "image" },
+  "product-05-front": { src: "media/product-05-front.jpeg", type: "image" },
+  "product-06-back": { src: "media/product-06-back.jpeg", type: "image" },
+  "product-06-front": { src: "media/product-06-front.jpeg", type: "image" },
+  "product-07-back": { src: "media/product-07-back.jpeg", type: "image" },
+  "product-07-front": { src: "media/product-07-front.jpeg", type: "image" },
+  "product-08-back": { src: "media/product-08-back.jpeg", type: "image" },
+  "product-08-front": { src: "media/product-08-front.jpeg", type: "image" },
+  "product-09-back": { src: "media/product-09-back.jpeg", type: "image" },
+  "product-09-front": { src: "media/product-09-front.jpeg", type: "image" },
+  "product-10-back": { src: "media/product-10-back.jpeg", type: "image" },
+  "product-10-front": { src: "media/product-10-front.jpeg", type: "image" },
+  "product-11-back": { src: "media/product-11-back.jpeg", type: "image" },
+  "product-11-front": { src: "media/product-11-front.jpeg", type: "image" },
+};
 
 const defaultProductSeeds = [
   { title: "TOP", media: { front: "collection-01" } },
@@ -52,6 +81,25 @@ const filePicker = document.createElement("input");
 filePicker.type = "file";
 filePicker.hidden = true;
 document.body.append(filePicker);
+
+const isAcceptedMediaFile = (file, acceptsVideo = true) => {
+  if (!file) {
+    return false;
+  }
+
+  const isImage = file.type.startsWith("image/") || /\.(avif|heic|heif|jpeg|jpg|png|svg|webp)$/i.test(file.name);
+  const isVideo = acceptsVideo && (file.type.startsWith("video/") || /\.(mov|mp4|webm)$/i.test(file.name));
+
+  return isImage || isVideo || productMediaFilePattern.test(file.name);
+};
+
+const getFileMediaType = (file) => {
+  if (file.type.startsWith("video/") || /\.(mov|mp4|webm)$/i.test(file.name)) {
+    return "video";
+  }
+
+  return "image";
+};
 
 const createId = () => {
   if (window.crypto?.randomUUID) {
@@ -320,6 +368,14 @@ const mediaCandidates = (baseName, preferredType = "image") => {
   );
 };
 
+const resolveBundledMedia = (baseName) => {
+  if (!baseName) {
+    return null;
+  }
+
+  return bundledProductMedia[baseName] || null;
+};
+
 const tryLoadImage = (src) =>
   new Promise((resolve) => {
     const img = new Image();
@@ -358,6 +414,12 @@ const resolveFallbackMedia = async (slot) => {
     return null;
   }
 
+  const bundledMedia = resolveBundledMedia(fallbackName);
+
+  if (bundledMedia) {
+    return bundledMedia;
+  }
+
   const sources = mediaCandidates(fallbackName, slot.dataset.preferredType || "image");
 
   for (const candidate of sources) {
@@ -394,7 +456,7 @@ const placeholderMarkup = () => `
   ${controlsMarkup(false)}
 `;
 
-const mediaMarkup = ({ type, src, label }) => {
+const mediaMarkup = ({ type, src, label, priority = false }) => {
   const safeSrc = escapeHtml(src);
   const element =
     type === "video"
@@ -404,7 +466,7 @@ const mediaMarkup = ({ type, src, label }) => {
           Your browser does not support the video tag.
         </video>
       `
-      : `<img src="${safeSrc}" alt="${escapeHtml(label)}" loading="lazy" />`;
+      : `<img src="${safeSrc}" alt="${escapeHtml(label)}" loading="${priority ? "eager" : "lazy"}" decoding="async" fetchpriority="${priority ? "high" : "auto"}" />`;
 
   return `
     <div class="slot-surface">
@@ -444,15 +506,16 @@ const productTypeOptions = (selectedType) =>
     )
     .join("");
 
-const productSlotMarkup = ({ productId, fallbackName, label }) => `
+const productSlotMarkup = ({ productId, fallbackName, label, index }) => `
   <div
     class="product-upload-slot is-empty"
     data-media-key="${slotKey(productId, "front")}"
     data-slot-name="front"
     data-fallback-name="${escapeHtml(fallbackName)}"
+    data-product-index="${index}"
     data-preferred-type="image"
     data-label="${escapeHtml(label)}"
-    data-accept="image/*,video/*"
+    data-accept="image/*,video/*,.heic,.heif"
     tabindex="0"
     role="button"
     aria-label="${escapeHtml(label)}: add or replace media"
@@ -461,7 +524,7 @@ const productSlotMarkup = ({ productId, fallbackName, label }) => `
 
 const productMarkup = (product, index) => {
   const title = normalizeProductType(product.title);
-  const revealDelay = `${(index % 9) * 34}ms`;
+  const revealDelay = `${(index % 9) * 14}ms`;
 
   return `
     <article class="product-card reveal" data-product-id="${product.id}" style="--reveal-delay: ${revealDelay}">
@@ -476,6 +539,7 @@ const productMarkup = (product, index) => {
         productId: product.id,
         fallbackName: productFallbackName(product, index, "front"),
         label: `${title} product image`,
+        index,
       })}
 
       <label class="product-type-label">
@@ -519,7 +583,13 @@ const attachHoverVideoPlayback = (slot) => {
 };
 
 const renderMedia = (slot, media) => {
-  slot.innerHTML = mediaMarkup({ ...media, label: slot.dataset.label || "Product image" });
+  const productIndex = Number(slot.dataset.productIndex || 0);
+
+  slot.innerHTML = mediaMarkup({
+    ...media,
+    label: slot.dataset.label || "Product image",
+    priority: productIndex < 6,
+  });
   slot.onfocusin = null;
   slot.onfocusout = null;
   slot.classList.add("has-media");
@@ -597,17 +667,16 @@ const observeReveals = () => {
 const renderProducts = async () => {
   revokeAllObjectUrls();
   productsList.innerHTML = products.map((product, index) => productMarkup(product, index)).join("");
-
-  await Promise.all(
-    Array.from(document.querySelectorAll(".product-upload-slot")).map((slot) => renderSlot(slot))
-  );
-
   observeReveals();
+
+  Array.from(document.querySelectorAll(".product-upload-slot")).forEach((slot) => {
+    void renderSlot(slot);
+  });
 };
 
 const applyFileToSlot = async (slot, file) => {
   const mediaKey = slot.dataset.mediaKey;
-  const mediaType = file.type.startsWith("video/") ? "video" : "image";
+  const mediaType = getFileMediaType(file);
   const src = URL.createObjectURL(file);
   const productElement = slot.closest("[data-product-id]");
   const currentProduct = productElement ? getProduct(productElement.dataset.productId) : null;
@@ -805,16 +874,24 @@ productsList.addEventListener("drop", async (event) => {
   slot.classList.remove("is-dragover");
 
   const acceptsVideo = slot.dataset.accept.includes("video");
-  const file = Array.from(event.dataTransfer?.files || []).find((candidate) => {
-    if (candidate.type.startsWith("image/")) {
-      return true;
-    }
-
-    return acceptsVideo && candidate.type.startsWith("video/");
-  });
+  const file = Array.from(event.dataTransfer?.files || []).find((candidate) =>
+    isAcceptedMediaFile(candidate, acceptsVideo)
+  );
 
   if (file) {
     await applyFileToSlot(slot, file);
+  }
+});
+
+document.addEventListener("dragover", (event) => {
+  if (Array.from(event.dataTransfer?.types || []).includes("Files")) {
+    event.preventDefault();
+  }
+});
+
+document.addEventListener("drop", (event) => {
+  if (!event.target.closest(".product-upload-slot")) {
+    event.preventDefault();
   }
 });
 
@@ -847,10 +924,8 @@ filePicker.addEventListener("change", async () => {
   }
 
   const acceptsVideo = activeSlot.dataset.accept.includes("video");
-  const isValidImage = file.type.startsWith("image/");
-  const isValidVideo = acceptsVideo && file.type.startsWith("video/");
 
-  if (isValidImage || isValidVideo) {
+  if (isAcceptedMediaFile(file, acceptsVideo)) {
     await applyFileToSlot(activeSlot, file);
   }
 

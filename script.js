@@ -1,8 +1,23 @@
 const imageExtensions = ["jpeg", "jpg", "png", "webp", "avif", "svg"];
 const videoExtensions = ["mp4", "webm", "mov"];
+const mediaFilePattern = /\.(avif|heic|heif|jpeg|jpg|mov|mp4|png|svg|webm|webp)$/i;
+const bundledSlotMedia = {
+  "closing-hero": { src: "media/closing-hero.jpeg", type: "image" },
+  "collection-01": { src: "media/collection-01.jpeg", type: "image" },
+  "collection-02": { src: "media/collection-02.jpeg", type: "image" },
+  "collection-03": { src: "media/collection-03.jpeg", type: "image" },
+  "contact-qr": { src: "media/contact-qr.png", type: "image" },
+  "cover-hero": { src: "media/cover-hero.jpeg", type: "image" },
+  "factory-craft": { src: "media/factory-craft.mp4", type: "video" },
+  "factory-film": { src: "media/factory-film.mp4", type: "video" },
+  "factory-floor": { src: "media/factory-floor.jpeg", type: "image" },
+  "story-detail": { src: "media/story-detail.png", type: "image" },
+  "story-editorial": { src: "media/story-editorial.jpeg", type: "image" },
+};
 const dbName = "mumma-lookbook";
 const dbVersion = 3;
 const storeName = "slot-media";
+const clearedSlotsKey = "mumma-lookbook-cleared-slots-v1";
 
 document.body.classList.add("js-enhanced");
 
@@ -16,9 +31,53 @@ let dbPromise = null;
 
 const filePicker = document.createElement("input");
 filePicker.type = "file";
-filePicker.accept = "image/*,video/*";
+filePicker.accept = "image/*,video/*,.heic,.heif";
 filePicker.hidden = true;
 document.body.append(filePicker);
+
+const isMediaFile = (file) => {
+  if (!file) {
+    return false;
+  }
+
+  return (
+    file.type.startsWith("image/") ||
+    file.type.startsWith("video/") ||
+    mediaFilePattern.test(file.name)
+  );
+};
+
+const getMediaType = (file) => {
+  const name = file.name.toLowerCase();
+
+  if (file.type.startsWith("video/") || /\.(mov|mp4|webm)$/i.test(name)) {
+    return "video";
+  }
+
+  return "image";
+};
+
+const readClearedSlots = () => {
+  try {
+    return JSON.parse(localStorage.getItem(clearedSlotsKey) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const writeClearedSlots = (slots) => {
+  localStorage.setItem(clearedSlotsKey, JSON.stringify([...new Set(slots)]));
+};
+
+const isSlotCleared = (slotName) => readClearedSlots().includes(slotName);
+
+const markSlotCleared = (slotName) => {
+  writeClearedSlots([...readClearedSlots(), slotName]);
+};
+
+const unmarkSlotCleared = (slotName) => {
+  writeClearedSlots(readClearedSlots().filter((currentSlot) => currentSlot !== slotName));
+};
 
 const escapeHtml = (value = "") =>
   value
@@ -245,6 +304,12 @@ const tryLoadVideo = (src) =>
 const resolveFallbackMedia = async (slot) => {
   const slotName = slot.dataset.slot;
   const preferredType = slot.dataset.type || "image";
+  const bundledMedia = bundledSlotMedia[slotName];
+
+  if (bundledMedia) {
+    return bundledMedia;
+  }
+
   const sources = mediaCandidates(slotName, preferredType);
 
   for (const candidate of sources) {
@@ -321,6 +386,11 @@ const renderSlot = async (slot) => {
     return;
   }
 
+  if (isSlotCleared(slotName)) {
+    renderPlaceholder(slot);
+    return;
+  }
+
   const fallback = await resolveFallbackMedia(slot);
 
   if (fallback) {
@@ -339,10 +409,11 @@ const renderSlot = async (slot) => {
 };
 
 const applyFileToSlot = async (slot, file) => {
-  const mediaType = file.type.startsWith("video/") ? "video" : "image";
+  const mediaType = getMediaType(file);
   const slotName = slot.dataset.slot;
   const src = URL.createObjectURL(file);
 
+  unmarkSlotCleared(slotName);
   revokeObjectUrl(slotName);
   objectUrls.set(slotName, src);
   renderMedia(slot, { type: mediaType, src });
@@ -356,16 +427,9 @@ const openPicker = (slot) => {
 
 const clearSlot = async (slot) => {
   const slotName = slot.dataset.slot;
+  markSlotCleared(slotName);
   await removeSavedMedia(slotName);
   revokeObjectUrl(slotName);
-
-  const fallback = await resolveFallbackMedia(slot);
-
-  if (fallback) {
-    renderMedia(slot, fallback);
-    return;
-  }
-
   renderPlaceholder(slot);
 };
 
@@ -388,13 +452,17 @@ const attachSlotEvents = (slot) => {
 
     if (action) {
       event.preventDefault();
+      event.stopPropagation();
       await handleSlotAction(slot, action);
       return;
     }
 
     if (slot.classList.contains("is-empty")) {
       openPicker(slot);
+      return;
     }
+
+    openPicker(slot);
   });
 
   slot.addEventListener("keydown", (event) => {
@@ -419,9 +487,7 @@ const attachSlotEvents = (slot) => {
     event.preventDefault();
     slot.classList.remove("is-dragover");
 
-    const file = Array.from(event.dataTransfer?.files || []).find((candidate) => {
-      return candidate.type.startsWith("image/") || candidate.type.startsWith("video/");
-    });
+    const file = Array.from(event.dataTransfer?.files || []).find(isMediaFile);
 
     if (file) {
       await applyFileToSlot(slot, file);
@@ -438,7 +504,7 @@ filePicker.addEventListener("change", async () => {
     return;
   }
 
-  if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+  if (isMediaFile(file)) {
     await applyFileToSlot(activeSlot, file);
   }
 
@@ -448,6 +514,18 @@ filePicker.addEventListener("change", async () => {
 
 mediaSlots.forEach((slot) => {
   attachSlotEvents(slot);
+});
+
+document.addEventListener("dragover", (event) => {
+  if (Array.from(event.dataTransfer?.types || []).includes("Files")) {
+    event.preventDefault();
+  }
+});
+
+document.addEventListener("drop", (event) => {
+  if (!event.target.closest(".media-slot")) {
+    event.preventDefault();
+  }
 });
 
 if ("IntersectionObserver" in window) {
